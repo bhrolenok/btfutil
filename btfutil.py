@@ -48,8 +48,10 @@ class BTF:
 			cname = os.path.basename(column)[:-4]
 			self.column_filenames[cname] = column
 
-	def save_to_dir(self,dirname,overwrite=False):
-		for key in self.column_data:
+	def save_to_dir(self,dirname,overwrite=False,columns=None):
+		if columns is None:
+			columns = self.column_data.keys()
+		for key in columns:
 			fname = os.path.join(dirname,key+".btf")
 			if os.path.exists(fname) and not(overwrite):
 				raise IOError("File exists: ["+fname+"]")
@@ -235,3 +237,25 @@ def merge_by_column(btf1,btf2,colname):
 
 def load_sequence_dir(seqdir):
 	return [BTF(os.path.join(seqdir,name)) for name in os.listdir(seqdir) if os.path.isdir(os.path.join(seqdir,name))]
+
+def compute_img2pos(in_btf,pixel_per_m,x_offset=0.0,y_offset=0.0,reuse=True,ximg_cname='ximage',yimg_cname='yimage',fmt_str="{}"):
+	newcols = dict()
+	newcols['xpos'] = [fmt_str.format(x_offset+(float(ximg_val)/float(pixel_per_m))) for ximg_val in in_btf[ximg_cname]]
+	newcols['ypos'] = [fmt_str.format(y_offset+(float(yimg_val)/float(pixel_per_m))) for yimg_val in in_btf[yimg_cname]]
+	if reuse:
+		in_btf.column_data.update(newcols)
+		return in_btf
+	else:
+		rv_btf = BTF()
+		rv_btf.column_data=newcols
+		return rv_btf
+
+def compute_ts2clock(in_btf,stamps_per_s,offset=0.0,reuse=True,stamp_cname='timestamp',fmt_str="{}"):
+	newcol = [fmt_str.format(offset+(float(stamp_val)/float(stamps_per_s))) for stamp_val in in_btf[stamp_cname]]
+	if reuse:
+		in_btf.column_data['clocktime'] = newcol
+		return in_btf
+	else:
+		rv_btf = BTF()
+		rv_btf.column_data['clocktime']=newcol
+		return rv_btf
