@@ -259,3 +259,17 @@ def compute_ts2clock(in_btf,stamps_per_s,offset=0.0,reuse=True,stamp_cname='time
 		rv_btf = BTF()
 		rv_btf.column_data['clocktime']=newcol
 		return rv_btf
+
+def snip(in_btf, start_idx, end_idx, basepath=None):
+	snipped_column_data = dict()
+	for key in in_btf.column_filenames.keys():
+		snipped_column_data[key] = in_btf[key][start_idx:end_idx]
+	if basepath is None:
+		in_btf.column_data.update(snipped_column_data)
+		return in_btf
+	else:
+		new_btf = BTF()
+		new_btf.column_data.update(snipped_column_data)
+		for key in in_btf.column_filenames.keys():
+			new_btf.column_filenames[key] = os.path.join(basepath,key+".btf")
+		return new_btf
