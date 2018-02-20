@@ -98,6 +98,15 @@ class BTF:
 		rv = numpy.array(rv,dtype=[(key,'float') for key in self.column_data])
 		return rv
 
+	def to_dataframe(self,float_columns=None):
+		if not('pandas' in globals().keys()):
+			import pandas
+		self.load_all_columns()
+		rv = pandas.DataFrame().assign(**self.column_data)
+		if not(float_columns is None):
+			rv[float_columns] = rv[float_columns].apply(numpy.float_,raw=True)
+		return rv
+
 	def __contains__(self,key):
 		return key in self.column_filenames
 
