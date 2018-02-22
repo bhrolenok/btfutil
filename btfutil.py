@@ -106,7 +106,6 @@ class BTF:
 		if not(float_columns is None):
 			rv[float_columns] = rv[float_columns].apply(numpy.float_,raw=True)
 		return rv
-
 	def __contains__(self,key):
 		return key in self.column_filenames
 
@@ -282,3 +281,10 @@ def snip(in_btf, start_idx, end_idx, basepath=None):
 		for key in in_btf.column_filenames.keys():
 			new_btf.column_filenames[key] = os.path.join(basepath,key+".btf")
 		return new_btf
+
+def from_df(btf_df,basepath=None):
+	rv = BTF()
+	rv.column_data = {col:[str(f) for f in btf_df[col].tolist()] for col in btf_df.columns}
+	if not(basepath is None):
+		rv.column_filenames = {col:os.path.join(basepath,col+".btf") for col in rv.column_data.keys()}
+	return rv
