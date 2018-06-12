@@ -288,3 +288,16 @@ def from_df(btf_df,basepath=None):
 	if not(basepath is None):
 		rv.column_filenames = {col:os.path.join(basepath,col+".btf") for col in rv.column_data.keys()}
 	return rv
+
+def split_column(btf, col_to_split, split_names,split_func=str.split,basepath=None,save=True,overwrite=False):
+	splitted_cols = zip(*map(split_func,btf[col_to_split]))
+	if len(splitted_cols) != len(split_names):
+		raise Exception("Error trying to split column ["+col_to_split+"]: Column was split into "+len(splitted_cols)+" but "+len(split_names)+" was expected.")
+	if basepath is None:
+		basepath = os.path.dirname(btf.column_filenames[col_to_split])
+	for col_idx in range(len(splitted_cols)):
+		btf.column_data[split_names[col_idx]] = splitted_cols[col_idx]
+		btf.column_filenames[split_names[col_idx]] = os.path.join(basepath,split_names[col_idx]+".btf")
+	if save:
+		btf.save_to_dir(basepath,overwrite=overwrite,columns=split_names)
+	return btf
