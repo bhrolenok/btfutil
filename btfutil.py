@@ -107,7 +107,7 @@ class BTF:
 			rv[float_columns] = rv[float_columns].apply(numpy.float_,raw=True)
 		return rv
 	def __contains__(self,key):
-		return key in self.column_filenames
+		return (key in self.column_filenames) or (key in self.column_data)
 
 	def __getitem__(self,key):
 		if not(self.__contains__(key)):
