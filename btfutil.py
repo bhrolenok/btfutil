@@ -211,14 +211,28 @@ def split_subsequences(btf,subseq_length_t,ignore_shorter=True,depth=0,debug=Fal
 	return rv
 
 def writeInitialPlacement(outf,initialPlacementBTF,frameBoundaryColName='timestamp'):
-	rowIdx = 0
-	while rowIdx < len(initialPlacementBTF['id']) and initialPlacementBTF[frameBoundaryColName][rowIdx] == initialPlacementBTF[frameBoundaryColName][0]:
-		outf.write(initialPlacementBTF['id'][rowIdx])
-		outf.write(" "+initialPlacementBTF['xpos'][rowIdx])
-		outf.write(" "+initialPlacementBTF['ypos'][rowIdx])
-		outf.write(" "+initialPlacementBTF['timage'][rowIdx]+"\n")
-		rowIdx += 1
-	return rowIdx
+	initPosDict = dict()
+	timesDict = dict()
+	for rowIdx in range(len(initialPlacementBTF['id'])):
+		curId = initialPlacementBTF['id'][rowIdx]
+		if curId in initPosDict.keys():
+			continue
+		else:
+			initPosDict[curId] = rowIdx
+			timesDict[curId] = initialPlacementBTF[frameBoundaryColName][rowIdx]
+	for idKey in initPosDict.keys():
+		outf.write(idKey)
+		outf.write(" "+initialPlacementBTF['xpos'][initPosDict[idKey]])
+		outf.write(" "+initialPlacementBTF['ypos'][initPosDict[idKey]])
+		outf.write(" "+initialPlacementBTF['timage'][initPosDict[idKey]]+"\n")
+	return timesDict
+	# while rowIdx < len(initialPlacementBTF['id']) and initialPlacementBTF[frameBoundaryColName][rowIdx] == initialPlacementBTF[frameBoundaryColName][0]:
+	# 	outf.write(initialPlacementBTF['id'][rowIdx])
+	# 	outf.write(" "+initialPlacementBTF['xpos'][rowIdx])
+	# 	outf.write(" "+initialPlacementBTF['ypos'][rowIdx])
+	# 	outf.write(" "+initialPlacementBTF['timage'][rowIdx]+"\n")
+	# 	rowIdx += 1
+	# return rowIdx
 
 def btf2data(btf,feature_names,augment,ys_colname='dvel'):
 	features = numpy.column_stack([map(lambda line: map(float,line.split()), btf[col_name]) for col_name in feature_names])
